@@ -86,9 +86,9 @@ namespace Serilog.Sinks.HttpLogstashEcs
                     stringContent.Headers.Add("Content-Type", "application/json");
 
                     // Using singleton of HttpClient so we need ensure of thread safety. Just use LockAsync.
-                    using (Mutex.LockAsync().ConfigureAwait(false).GetAwaiter().GetResult())
+                    using (await Mutex.LockAsync().ConfigureAwait(false))
                     {
-                        HttpClient.PostAsync(_state.Options.LogstashUri, stringContent).ConfigureAwait(false).GetAwaiter().GetResult();
+                        await HttpClient.PostAsync(_state.Options.LogstashUri, stringContent).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
