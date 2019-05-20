@@ -26,9 +26,9 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-
+using Newtonsoft.Json;
 using Nito.AsyncEx;
-
+using Serilog.ElasticCommonSchema;
 using Serilog.Events;
 using Serilog.Sinks.PeriodicBatching;
 
@@ -78,9 +78,22 @@ namespace Serilog.Sinks.HttpLogstashEcs
             {
                 try
                 {
-                    var sw = new StringWriter();
+                    BaseModel model;
+                    if (e.Exception != null)
+                    {
+                        model = new BaseModel(e.Exception);
+                        model.Timestamp = e.Timestamp;
+                    }
+                    else
+                    {
+                        model = new BaseModel();
+                    }
+                    
+                    /*var sw = new StringWriter();
                     _state.Formatter.Format(e, sw);
-                    var logData = sw.ToString();
+                    var logData = sw.ToString();*/
+
+                    var logData = JsonConvert.SerializeObject(model);                    
                     var stringContent = new StringContent(logData);
                     stringContent.Headers.Remove("Content-Type");
                     stringContent.Headers.Add("Content-Type", "application/json");
